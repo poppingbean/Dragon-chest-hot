@@ -1,0 +1,23 @@
+{
+    "extends": "./.svelte-kit/tsconfig.json",
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "moduleResolution": "node"
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.svelte"
+    ],
+    "exclude": [
+        "node_modules/*",
+        "__sapper__/*",  // You can remove this line if you are not migrating from Sapper.
+        "public/*"
+    ]
+}
