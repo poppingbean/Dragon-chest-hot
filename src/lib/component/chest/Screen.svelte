@@ -374,6 +374,19 @@
             }
         }, 1000);
     };
+    
+    let sinterval: NodeJS.Timeout;
+    $: {
+        if (sinterval) {
+            clearInterval(sinterval);
+        }
+
+        sinterval = setInterval(async () =>  {
+            let updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
+            setPlayer(updatedPlayer);
+        }, 3000);
+    };
+    /// End of Main functions
 
     onMount(() => {
         return () => {

@@ -253,7 +253,7 @@
         sinterval = setInterval(async () =>  {
             let updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
             setPlayer(updatedPlayer);
-        }, 5000);
+        }, 3000);
     };
     /// End of Main functions
 
