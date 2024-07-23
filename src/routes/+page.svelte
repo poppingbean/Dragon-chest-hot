@@ -5,7 +5,7 @@
       import "../stone.css";
       import { onMount } from 'svelte';
       
-      import Screen from '$lib/component/hotchest/Screen.svelte';
+      import Screen from '$lib/component/chest/Screen.svelte';
   
       onMount(async () => {
       });
