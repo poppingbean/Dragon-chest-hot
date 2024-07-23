@@ -24,10 +24,10 @@ const NETWORK_CONFIG = {
   },
 };
 
-const currentNetwork = 'testnet'; // Change to 'mainnet' for mainnet configuration
+const currentNetwork = 'mainnet'; // Change to 'mainnet' for mainnet configuration
 
-export const CONTRACT_ID = "blackdragonchest.testnet";
-export const CONTRACT_ID_FT = "blackdragontoken.testnet";
+export const CONTRACT_ID = "dragonchests.near";
+export const CONTRACT_ID_FT = "blackdragon.tkn.near";
 
 let selector: WalletSelector;
 let modal: WalletSelectorModal;
