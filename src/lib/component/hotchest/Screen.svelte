@@ -6,6 +6,7 @@
     import Loading from '$lib/component/chest/components/Loading.svelte'
     import { signIn, signOut, initHere, viewFunction, callFunction, viewFunctionFT, callFunctionFT } from '$lib/utility/hot-chest';
     import { walletAccount, bufferResult, performBufferAction, accountId } from '../../../store/wallet-store';
+    import { currentPlayer, antiProxyDelayData, setPlayer, resetPlayer, setCalledFunction, isCalledFunctionValid, hasPlayerDataChanged } from '../../../store/user-store';
     import { showPopup, closePopup, isLoggedOut } from '../../../store/chestpopup-store';
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
@@ -58,13 +59,12 @@
     });
 
     /// Start of Main functions interact with game contract
-    // Function to GetPlayer, SetPlayer, ResetPlayer
-    const setPlayer = (updatedPlayer: any) => {
-        playerData = updatedPlayer;
-    }
-    const resetPlayer = () => {
-        setPlayer(null);
-    };
+
+    // Subscribe to the player store
+    currentPlayer.subscribe(value => {
+        playerData = value;
+    });
+
     const getPlayer = async (accountId: string | null | undefined) => {
         if (accountId) { 
             // Gọi hàm viewFunction để lấy thông tin player từ contract
@@ -84,10 +84,7 @@
         try {
             setLoading(true);
             await callFunction('create_player', {});
-            // Get player after calling create player
-            const updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
-            // Update player
-            setPlayer(updatedPlayer);
+            setCalledFunction('create_player');
             showNotification('Player created successfully!', 'success');
         } catch (err) {
             const errorMessage = err.message || 'Error create new player';
@@ -102,9 +99,7 @@
         try {
             setLoading(true);
             const result = await callFunction('claim_key', {});
-            const updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
-            // Update player
-            setPlayer(updatedPlayer);
+            setCalledFunction('claim_key');
             showNotification('Key claimed successfully!', 'success');
         } catch (err) {
             const errorMessage = err.message || 'Error claiming key';
@@ -118,10 +113,9 @@
         try {
             setLoading(true);
             const result = await callFunction('open_chest', {});
+            setCalledFunction('open_chest');
             if(result && result.status && result.status.SuccessValue) {
-                let updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
                 showPopup("You opened " + atob(result.status.SuccessValue).replace('"',''), true, false, '');
-                setPlayer(updatedPlayer);
                 showNotification('Chest opened successfully!', 'success');
             }
         } catch (err) {
@@ -136,8 +130,7 @@
         try {
             setLoading(true);
             const result = await callFunction('exchange_chest',{});
-            const updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
-            setPlayer(updatedPlayer);
+            setCalledFunction('exchange_chest');
             showNotification('You just exchanged key/ resources to treasure!', 'success');
         } catch (err) {
             const errorMessage = err.message || 'Error exchanging chest';
@@ -159,11 +152,7 @@
                 return;
             }
             const result = await callFunction('upgrade',{});
-            const updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
-            setPlayer(updatedPlayer);
-            if(updatedPlayer.keys_per_claim < 4) {
-                showUpgrade = true;
-            }
+            setCalledFunction('upgrade');
             showNotification('Upgrade successfully!', 'success');
         } catch (err) {
             const errorMessage = err.message || 'Error exchanging chest';
@@ -183,16 +172,8 @@
                 showNotification(errorMessage, 'error');
             }
             else{
-                const currentPlayer = await viewFunction('get_player', { account_id: signedAccountId });
                 await callFunction('swap_gift',{});
-                const updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
-                setPlayer(updatedPlayer);
-
-                let responseRewardString = comparePlayerState(currentPlayer, updatedPlayer);
-                if(responseRewardString.length > 0){
-                    showPopup(responseRewardString, true, false, '');
-                }
-
+                setCalledFunction('swap_gift');
                 showNotification('You just opened a gift!', 'success');
             }
         } catch (err) {
@@ -242,18 +223,6 @@
                 return "";
             }
         }
-    };
-
-    let sinterval: NodeJS.Timeout;
-    $: {
-        if (sinterval) {
-            clearInterval(sinterval);
-        }
-
-        sinterval = setInterval(async () =>  {
-            let updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
-            setPlayer(updatedPlayer);
-        }, 3000);
     };
     /// End of Main functions
 
@@ -385,6 +354,50 @@
                 countDownTimer = 0;
             }
         }, 1000);
+    };
+
+    
+    let sinterval: NodeJS.Timeout;
+    $: {
+        if (sinterval) {
+            clearInterval(sinterval);
+        }
+
+        sinterval = setInterval(async () =>  {
+            if (here && isCalledFunctionValid()) {
+                let updatedPlayer = await viewFunction('get_player', { account_id: signedAccountId });
+                setPlayer(updatedPlayer);
+                
+                const { changed, details } = hasPlayerDataChanged();
+                if (changed) {
+                    //check if upgrade changed
+                    if(playerData.keys_per_claim < 4) {
+                        showUpgrade = true;
+                    }
+                    //check if gift changed
+                    if(details && details.gift && details.gift.oldValue > details.gift.newValue) {
+                        //This mean gift opened. Check if key obtained
+                        if(detail.keys && detail.keys.oldValue < details.keys.newValue) {
+                            const diffKeys = details.keys.newValue - details.keys.oldValue;
+                            if (diffKeys >= 9) {
+                                let responseRewardString = "Congrat!!!!! You just received " + diffKeys + " keys";
+                                showPopup(responseRewardString, true, false, '');
+                            }
+                        }
+                        //Check if token obtained
+                        if(details.token_rewarded && details.token_rewarded.oldValue < details.token_rewarded.newValue) {
+                            const diffTokens = details.token_rewarded.newValue - details.token_rewarded.oldValue;
+                            if (diffTokens > 0) {
+                                let responseRewardString = "Congrat!!!!! You just received " + diffTokens + " $Blackdragon tokens";
+                                showPopup(responseRewardString, true, false, '');
+                            }
+                        }
+
+                    }
+                    setCalledFunction(''); // Cut off scanner until new transaction made
+                }
+            }
+        }, 2000);
     };
 
     onMount(() => {

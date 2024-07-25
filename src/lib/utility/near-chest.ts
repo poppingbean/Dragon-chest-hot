@@ -34,6 +34,7 @@ let modal: WalletSelectorModal;
 let wallet: any; // Declare wallet
 
 export const initNearChest = async (): Promise<{ selector: WalletSelector, modal: WalletSelectorModal }> => {
+  console.log("Start Initialize Near Chests");
   selector = await setupWalletSelector({
     network: currentNetwork,
     modules: [
@@ -73,22 +74,24 @@ export const signOut = async (): Promise<void> => {
 
 export const viewFunction = async (functionName: string, args = {}): Promise<any> => {
   try {
-    const account = selector.store.getState().accounts[0];
-    const near = await connect({
-      networkId: NETWORK_CONFIG[currentNetwork].networkId,
-      keyStore: new keyStores.BrowserLocalStorageKeyStore(),
-      nodeUrl: NETWORK_CONFIG[currentNetwork].nodeUrl,
-      walletUrl: NETWORK_CONFIG[currentNetwork].walletUrl,
-      helperUrl: NETWORK_CONFIG[currentNetwork].helperUrl,
-    });
-    const walletConnection = new WalletConnection(near, 'app'); // Provide an appKeyPrefix
-    const accountInstance = walletConnection.account();
-    const result = await accountInstance.viewFunction({
-      contractId: CONTRACT_ID,
-      methodName: functionName,
-      args,
-    });
-    return result;
+    if(selector){
+      const account = selector.store.getState().accounts[0];
+      const near = await connect({
+        networkId: NETWORK_CONFIG[currentNetwork].networkId,
+        keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+        nodeUrl: NETWORK_CONFIG[currentNetwork].nodeUrl,
+        walletUrl: NETWORK_CONFIG[currentNetwork].walletUrl,
+        helperUrl: NETWORK_CONFIG[currentNetwork].helperUrl,
+      });
+      const walletConnection = new WalletConnection(near, 'app'); // Provide an appKeyPrefix
+      const accountInstance = walletConnection.account();
+      const result = await accountInstance.viewFunction({
+        contractId: CONTRACT_ID,
+        methodName: functionName,
+        args,
+      });
+      return result;
+    }
   } catch (error) {
     console.error(error);
     throw error;

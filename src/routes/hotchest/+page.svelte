@@ -34,6 +34,7 @@
     }
 </style>
 <div class={'root'}>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <main class={'container'}>
         <Screen />
     </main>

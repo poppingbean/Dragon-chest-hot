@@ -28,7 +28,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      outDir: 'out', // Thay đổi thư mục xuất ra tại đây
+      outDir: 'out',
       // plugins: [
       //   nodePolyfills()
       // ]
