@@ -364,9 +364,9 @@
                     //check if gift changed
                     if(details && details.gift && details.gift.oldValue > details.gift.newValue) {
                         //This mean gift opened. Check if key obtained
-                        if(detail.keys && detail.keys.oldValue < details.keys.newValue) {
+                        if(details.keys && details.keys.oldValue < details.keys.newValue) {
                             const diffKeys = details.keys.newValue - details.keys.oldValue;
-                            if (diffKeys >= 9) {
+                            if (diffKeys >= 4) {
                                 let responseRewardString = "Congrat!!!!! You just received " + diffKeys + " keys";
                                 showPopup(responseRewardString, true, false, '');
                             }
