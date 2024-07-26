@@ -115,7 +115,7 @@
             const result = await callFunction('open_chest', {});
             setCalledFunction('open_chest');
             if(result && result.status && result.status.SuccessValue) {
-                showPopup("You opened " + atob(result.status.SuccessValue).replace('"',''), true, false, '');
+                showPopup("You opened " + atob(result.status.SuccessValue).replaceAll('"',''), true, false, '');
                 showNotification('Chest opened successfully!', 'success');
             }
         } catch (err) {
