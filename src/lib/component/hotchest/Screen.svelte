@@ -211,19 +211,6 @@
     const setAccountRegistered = (result: any) => {
         accountRegistered = result;
     }
-    const comparePlayerState = (currentPlayer, updatedPlayer) => {
-        const diffKeys = updatedPlayer.keys - currentPlayer.keys;
-        if (diffKeys >= 9) {
-            return "Congrat!!!!! You just received " + diffKeys + " keys";
-        } else {
-            const diffTokens = updatedPlayer.token_rewarded - currentPlayer.token_rewarded;
-            if (diffTokens >= 0) {
-                return "Congrat!!!!! You just received " + (updatedPlayer.last_token_rewarded / 1_000_000_000_000_000_000_000_000) + " $Blackdragon tokens";
-            } else {
-                return "";
-            }
-        }
-    };
     /// End of Main functions
 
     /// Under construction Features
